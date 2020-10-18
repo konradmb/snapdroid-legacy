@@ -16,7 +16,7 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/myCoordinatorLayout"
@@ -25,14 +25,15 @@
     android:fitsSystemWindows="true"
     tools:context="de.badaix.snapcast.MainActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
+
+    <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
         <!-- android:paddingTop="@dimen/appbar_padding_top" -->
 
-        <androidx.appcompat.widget.Toolbar
+        <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -40,9 +41,9 @@
             app:popupTheme="@style/AppTheme.PopupOverlay">
             <!-- app:layout_scrollFlags="scroll|enterAlways" -->
 
-        </androidx.appcompat.widget.Toolbar>
+        </android.support.v7.widget.Toolbar>
 
-    </com.google.android.material.appbar.AppBarLayout>
+    </android.support.design.widget.AppBarLayout>
 
     <fragment
         android:id="@+id/groupListFragment"
@@ -59,5 +60,5 @@
         android:layout_gravity="center_vertical|center_horizontal"
         android:text="@string/connect" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</android.support.design.widget.CoordinatorLayout>
 

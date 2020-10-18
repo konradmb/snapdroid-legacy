@@ -18,7 +18,7 @@
 
 package de.badaix.snapcast.control.json;
 
-import androidx.annotation.NonNull;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.json.JSONArray;

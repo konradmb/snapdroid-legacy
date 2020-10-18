@@ -32,12 +32,13 @@ import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -304,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
     public void onStart() {
         super.onStart();
 
-        if (TextUtils.isEmpty(Settings.getInstance(this).getHost()))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && TextUtils.isEmpty(Settings.getInstance(this).getHost()))
             NsdHelper.getInstance(this).startListening("_snapcast._tcp.", SERVICE_NAME, this);
         else
             setHost(Settings.getInstance(this).getHost(), Settings.getInstance(this).getStreamPort(), Settings.getInstance(this).getControlPort());
@@ -468,14 +469,14 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
             public void run() {
                 if (connected) {
                     if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                        MenuItemCompat.setShowAsAction(miSettings, MenuItem.SHOW_AS_ACTION_NEVER);
                     if (miStartStop != null)
                         miStartStop.setVisible(true);
 //                    if (miRefresh != null)
 //                        miRefresh.setVisible(true);
                 } else {
                     if (miSettings != null)
-                        miSettings.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                        MenuItemCompat.setShowAsAction(miSettings, MenuItem.SHOW_AS_ACTION_ALWAYS);
                     if (miStartStop != null)
                         miStartStop.setVisible(false);
 //                    if (miRefresh != null)
@@ -532,7 +533,7 @@ public class MainActivity extends AppCompatActivity implements GroupItem.GroupIt
                 groupListFragment.updateServer(serverStatus);
             }
         });
-        deleteSnackbar.addCallback(new Snackbar.Callback() {
+        deleteSnackbar.setCallback(new Snackbar.Callback() {
             boolean dismissed = false;
 
             @Override

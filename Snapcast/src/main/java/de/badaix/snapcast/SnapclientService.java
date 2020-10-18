@@ -35,8 +35,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.TaskStackBuilder;
+import android.os.SystemClock;
+import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -124,7 +125,7 @@ public class SnapclientService extends Service {
             PendingIntent piStop = PendingIntent.getService(this, 0, stopIntent, 0);
 
             NotificationCompat.Builder builder =
-                    new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+                    (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.ic_media_play)
                             .setTicker(getText(R.string.ticker_text))
                             .setContentTitle(getText(R.string.notification_title))
@@ -139,6 +140,7 @@ public class SnapclientService extends Service {
             // started Activity.
             // This ensures that navigating backward from the Activity leads out of
             // your application to the Home screen.
+
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
             // Adds the back stack for the Intent (but not the Intent itself)
             stackBuilder.addParentStack(MainActivity.class);
