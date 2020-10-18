@@ -1,0 +1,103 @@
+diff --git a/client/Makefile b/client/Makefile
+index ec038d3b..3b12341c 100644
+--- a/client/Makefile
++++ b/client/Makefile
+@@ -34,7 +34,7 @@ DEBUG ?= 0
+ ifeq ($(DEBUG), 1)
+     CXXFLAGS += -g
+ else
+-    CXXFLAGS += -O2
++    CXXFLAGS += -O3
+ endif
+ 
+ ifneq ($(SANITIZE), )
+@@ -58,9 +58,9 @@ endif
+ ifeq ($(TARGET), ANDROID)
+ 
+ CXX       = $(PROGRAM_PREFIX)clang++
+-CXXFLAGS += -pthread -fPIC -DHAS_TREMOR -DHAS_OPENSL -DHAS_OBOE -I$(TOOLCHAIN)/sysroot/usr/include -I$(TOOLCHAIN)/sysroot/$(NDK_TARGET)/usr/local/include
+-LDFLAGS   = -L$(TOOLCHAIN)/sysroot/$(NDK_TARGET)/usr/local/lib -pie -lvorbisidec -logg -lFLAC -lopus -lsoxr -lOpenSLES -loboe -latomic -llog -static-libstdc++
+-OBJ      += player/opensl_player.o player/oboe_player.o
++CXXFLAGS += -pthread -fPIC -DHAS_TREMOR -DHAS_OPENSL -DNO_CPP11_STRING -I$(TOOLCHAIN)/sysroot/usr/include -I$(TOOLCHAIN)/sysroot/$(NDK_TARGET)/usr/local/include -I$(TOOLCHAIN)/boost_1_74_0
++LDFLAGS   = -L$(TOOLCHAIN)/sysroot/$(NDK_TARGET)/usr/local/lib -lvorbisidec -logg -lFLAC -lopus -lsoxr -lOpenSLES -latomic -llog -static-libstdc++
++OBJ      += player/opensl_player.o
+ 
+ else ifeq ($(TARGET), OPENWRT)
+ 
+@@ -95,7 +95,7 @@ all:	check-env $(BIN)
+ 
+ check-env:
+ ifeq ($(TARGET), ANDROID)
+-	$(eval TOOLCHAIN:=$(NDK_DIR)/toolchains/llvm/prebuilt/linux-x86_64)
++	$(eval TOOLCHAIN:=$(NDK_DIR))
+ ifndef NDK_DIR
+ 	$(error android NDK_DIR is not set)
+ endif
+@@ -106,14 +106,18 @@ ifeq ($(ARCH), x86)
+ 	$(eval NDK_TARGET:=x86_64-linux-android)
+ 	$(eval API:=21)
+ else ifeq ($(ARCH), arm)
+-	$(eval NDK_TARGET:=armv7a-linux-androideabi)
+-	$(eval API:=16)
+-	$(eval CXXFLAGS:=$(CXXFLAGS) -march=armv7)
++	$(eval NDK_TARGET:=arm-linux-androideabi)
++	$(eval API:=)
++	$(eval CXXFLAGS:=$(CXXFLAGS) -march=armv5)
++else ifeq ($(ARCH), arm-old)
++	$(eval NDK_TARGET:=)
++	$(eval API:=)
++	$(eval CXXFLAGS:=$(CXXFLAGS))
+ else ifeq ($(ARCH), aarch64)
+ 	$(eval NDK_TARGET:=aarch64-linux-android)
+ 	$(eval API:=21)
+ endif
+-	$(eval PROGRAM_PREFIX:=$(TOOLCHAIN)/bin/$(NDK_TARGET)$(API)-)
++	$(eval PROGRAM_PREFIX:=$(TOOLCHAIN)/bin/)
+ endif
+ 
+ $(BIN): $(OBJ)
+diff --git a/client/player/opensl_player.hpp b/client/player/opensl_player.hpp
+index c1479d4f..a61ad923 100644
+--- a/client/player/opensl_player.hpp
++++ b/client/player/opensl_player.hpp
+@@ -21,6 +21,7 @@
+ 
+ #include <SLES/OpenSLES.h>
+ #include <SLES/OpenSLES_Android.h>
++#include <SLES/OpenSLES_AndroidConfiguration.h>
+ #include <string>
+ 
+ #include "player.hpp"
+diff --git a/externals/Makefile b/externals/Makefile
+index 7ad2a391..f43a020e 100644
+--- a/externals/Makefile
++++ b/externals/Makefile
+@@ -35,16 +35,16 @@ ifndef ARCH
+ 	$(error ARCH is not set ("arm" or "aarch64" or "x86"))
+ endif
+ 
+-	$(eval TOOLCHAIN:=$(NDK_DIR)/toolchains/llvm/prebuilt/linux-x86_64)
++	$(eval TOOLCHAIN:=$(NDK_DIR)/)
+ 
+ ifeq ($(ARCH), x86)
+ 	$(eval CPPFLAGS:=-DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN)
+ 	$(eval TARGET:=x86_64-linux-android)
+ 	$(eval API:=21)
+ else ifeq ($(ARCH), arm)
+-	$(eval CPPFLAGS:=-U_ARM_ASSEM_)
+-	$(eval TARGET:=armv7a-linux-androideabi)
+-	$(eval API:=16)
++	$(eval CPPFLAGS:=-U_ARM_ASSEM_ -march=armv5 -O3)
++	$(eval TARGET:=arm-linux-androideabi)
++	$(eval API:=)
+ else ifeq ($(ARCH), aarch64)
+ 	$(eval CPPFLAGS:=-U_ARM_ASSEM_ -DLITTLE_ENDIAN=1234 -DBIG_ENDIAN=4321 -DBYTE_ORDER=LITTLE_ENDIAN)
+ 	$(eval TARGET:=aarch64-linux-android)
+@@ -64,6 +64,7 @@ flac: check-env
+ 	export CPPFLAGS="$(CPPFLAGS)"; \
+ 	./autogen.sh; \
+ 	./configure --host=$(ARCH) --disable-ogg --prefix=$(SYSROOT)/usr/local/; \
++	sed -i 's/#define HAVE_SYS_PARAM_H 1//' config.h; \
+ 	make; \
+ 	make install; \
+ 	make clean;
